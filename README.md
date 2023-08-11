@@ -15,9 +15,33 @@
 
 ## Usage
 
-1. **Clone the Repository**: Clone the `pwsh-profile` repository to your local machine.
-2. **Run the Installer Script**: Execute the `profile_install.ps1` script to begin the installation and configuration process.
-3. **Customize as Needed**: Modify the custom profile and themes to suit your preferences.
+Setting up the `pwsh-profile` for your PowerShell environment is a simple process. Just follow these steps:
+
+### Step 1: Clone the Repository
+
+Clone the `pwsh-profile` repository to your local machine. You can use the following command:
+
+    git clone https://github.com/ludothegreat/pwsh-profile.git
+
+### Step 2: Navigate to the Repository
+
+Navigate to the cloned repository folder:
+
+    cd pwsh-profile
+
+### Step 3: Run the Installer Script
+
+Execute the `profile_install.ps1` script to begin the installation and configuration process:
+
+    .\profile_install.ps1
+
+### Step 4: Customize (Optional)
+
+Feel free to customize the profile, themes, and other settings to suit your preferences. You'll find the custom profile and theme files in the repository folder.
+
+### Step 5: Enjoy Your New PowerShell Experience!
+
+That's it! Your PowerShell environment is now configured with Oh My Posh, custom fonts, and themes. Enjoy your enhanced PowerShell experience!
 
 ## Requirements
 
