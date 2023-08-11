@@ -49,7 +49,14 @@ function home {
 
 # Navigate to the user's Documents folder
 function docs {
-    Set-Location "C:\Users\ludot\OneDrive\Documents"
+    # Get the OneDrive path from the environment variable
+    $oneDrivePath = [Environment]::GetEnvironmentVariable('OneDrive', 'User')
+    
+    # Construct the path to the OneDrive Documents folder
+    $oneDriveDocumentsPath = Join-Path -Path $oneDrivePath -ChildPath "Documents"
+    
+    # Navigate to the OneDrive Documents folder
+    Set-Location $oneDriveDocumentsPath
 }
 
 function weather {
@@ -159,4 +166,4 @@ function Update-Profile {
 Set-Alias reload Update-Profile
 
 ## Final Line to set prompt
-oh-my-posh init pwsh --config 'C:\Users\ludot\AppData\Local\Programs\oh-my-posh\themes\customkali.omp.json'| Invoke-Expression
+oh-my-posh init pwsh --config '%LOCALAPPDATA%\Programs\oh-my-posh\themes\customkali.omp'| Invoke-Expression

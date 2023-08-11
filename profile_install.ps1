@@ -79,6 +79,43 @@ $settings | ConvertTo-Json -Depth 100 | Set-Content -Path $settingsPath
 
 Write-Host "Font updated successfully."
 
+# URL of the GitHub repository
+$repoUrl = "https://github.com/ludothegreat/pwsh-profile.git"
+
+# Path where the repository will be cloned
+$clonePath = "C:\Scripts\pwsh-profile"
+
+# Check if the clone path exists, create it if not
+if (-Not (Test-Path -Path $clonePath)) {
+    New-Item -Path $clonePath -ItemType Directory -Force
+}
+
+# Navigate to the parent directory
+Set-Location "C:\Scripts"
+
+# Clone the repository
+Write-Host "Cloning repository from $repoUrl..."
+git clone $repoUrl
+
+# Path to the custom Microsoft.PowerShell_profile.ps1 inside the cloned repository
+$sourceProfilePath = Join-Path -Path $clonePath -ChildPath "Microsoft.PowerShell_profile.ps1"
+
+# Get the OneDrive path from the environment variable
+$oneDrivePath = [Environment]::GetEnvironmentVariable('OneDrive', 'User')
+
+# Construct the destination path for the user's PowerShell profile
+$destinationProfilePath = Join-Path -Path $oneDrivePath -ChildPath "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+
+# Check if the destination folder exists, create it if not
+$destinationFolder = Split-Path -Path $destinationProfilePath
+if (-Not (Test-Path -Path $destinationFolder)) {
+    New-Item -Path $destinationFolder -ItemType Directory -Force
+}
+
+# Copy the custom profile
+Write-Host "Copying custom profile to $destinationProfilePath..."
+Copy-Item -Path $sourceProfilePath -Destination $destinationProfilePath -Force
+
+Write-Host "Custom profile copied successfully."
+
 # Additional configuration and steps can be added here
-
-
