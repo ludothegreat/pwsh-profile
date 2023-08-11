@@ -1,101 +1,49 @@
-<#
-.SYNOPSIS
-    This script installs and configures a PowerShell profile with Oh My Posh, custom fonts, and themes.
+# TESTING ONLY!!!! Bypass the execution policy for the current session
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
-.DESCRIPTION
-    The script performs the following actions:
-    - Installs winget if not present.
-    - Installs the latest PowerShell version if below 7.
-    - Installs Oh My Posh.
-    - Downloads and installs Hack Nerd Font.
-    - Updates PowerShell settings to use the custom font.
-    - Clones a GitHub repository containing custom profiles and themes.
-    - Copies the custom profile and theme to the appropriate locations.
+function Install-LatestPowerShell {
+    # Check if PowerShell 7 is already installed
+    if (Get-Command -Name 'pwsh' -ErrorAction SilentlyContinue) {
+        Write-Host "PowerShell 7 is already installed."
+        return
+    }
 
-.NOTES
-    The script must be run with administrator privileges to perform certain actions, such as installing fonts.
+    # Set the API URL for the latest release
+    $latestReleaseApiUrl = "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
 
-.LINK
-    GitHub repository: https://github.com/ludothegreat/pwsh-profile.git
-#>
+    # Invoke the REST method to get the latest release information
+    $releaseInfo = Invoke-RestMethod -Uri $latestReleaseApiUrl
 
-# Check if winget is installed and install if not
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Host "winget is not installed. Installing now..."
-    # Install winget outside of the store
-    Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
-    Write-Host "winget installation complete."
-} else {
-    Write-Host "winget is already installed."
+    # Find the download URL for the Windows 64-bit MSI
+    $downloadUrl = ($releaseInfo.assets | Where-Object { $_.browser_download_url -like '*win-x64.msi' }).browser_download_url
+
+    # Define the output file path
+    $outFile = "$env:USERPROFILE\Downloads\" + [System.IO.Path]::GetFileName($downloadUrl)
+
+    # Download the MSI file
+    Invoke-WebRequest -Uri $downloadUrl -OutFile $outFile
+
+    # Install the downloaded MSI silently
+    Start-Process -FilePath 'msiexec.exe' -ArgumentList "/i `"$outFile`" /quiet /norestart" -Wait
 }
 
-# Check if the latest PowerShell version is installed and install if not
-if ($PSVersionTable.PSVersion.Major -lt 7) {
-    Write-Host "Installing latest PowerShell version..."
-    # Use winget to install the latest PowerShell version
-    winget install --id=Microsoft.PowerShell -e
-}
-Write-Host "Latest PowerShell version installed."
+function Update-OhMyPosh {
+    # Check if oh-my-posh is installed
+    $ohMyPoshPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\oh-my-posh.exe"
+    if (Test-Path $ohMyPoshPath) {
+        Write-Host "Oh-My-Posh is already installed. Updating..."
+    } else {
+        Write-Host "Oh-My-Posh is not installed. Installing..."
+    }
 
-# Install Oh My Posh using winget
-Write-Host "Installing Oh My Posh..."
-winget install JanDeDobbeleer.OhMyPosh -s winget
-
-# Check if running as an administrator and relaunch if not
-if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Host "Restarting PowerShell as Administrator..."
-    Start-Process PowerShell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File $($MyInvocation.MyCommand.Definition)" -Verb RunAs
-    exit
+    # Install or update Oh-My-Posh using the official installation script
+    Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://ohmyposh.dev/install.ps1'))
 }
 
-# Get the source of the installed Oh My Posh
-Write-Host "Getting Oh My Posh source..."
-$ohMyPoshSource = (Get-Command oh-my-posh).Source
-Write-Host "Oh My Posh installed at: $ohMyPoshSource"
+# Install the latest version of PowerShell
+Install-LatestPowerShell
 
-# Download and extract Hack Nerd Font
-$url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/Hack.zip"
-$tempFile = "$env:TEMP\\Hack.zip"
-Write-Host "Downloading Hack Nerd Font..."
-Invoke-WebRequest -Uri $url -OutFile $tempFile
-$tempFolder = "$env:TEMP\\Hack"
-Write-Host "Extracting Hack Nerd Font..."
-Expand-Archive -Path $tempFile -DestinationPath $tempFolder
+# Install or update Oh-My-Posh
+Update-OhMyPosh
 
-# Install fonts from the extracted folder
-Get-ChildItem "$tempFolder\\*.ttf" | ForEach-Object {
-    Write-Host "Installing font $_..."
-    Copy-Item $_.FullName -Destination "C:\\Windows\\Fonts"
-}
-
-# Update PowerShell Font in the JSON settings file
-Write-Host "Updating PowerShell font..."
-$settingsFile = "$env:LOCALAPPDATA\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"
-(Get-Content $settingsFile) -replace '"fontFace": ".*"', '"fontFace": "Hack Nerd Font"' | Set-Content $settingsFile
-
-# Get the path where the script is running (assumed to be the root of the cloned repository)
-$clonePath = Split-Path -Parent $MyInvocation.MyCommand.Definition
-
-# Copy Custom Powershell Profile
-$sourceProfilePath = Join-Path -Path $clonePath -ChildPath "Microsoft.PowerShell_profile.ps1"
-$oneDrivePath = [Environment]::GetEnvironmentVariable('OneDrive', 'User')
-$destinationProfilePath = Join-Path -Path $oneDrivePath -ChildPath "Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-$destinationFolder = Split-Path -Path $destinationProfilePath
-if (-Not (Test-Path -Path $destinationFolder)) {
-    New-Item -Path $destinationFolder -ItemType Directory -Force
-}
-Write-Host "Copying custom profile to $destinationProfilePath..."
-Copy-Item -Path $sourceProfilePath -Destination $destinationProfilePath -Force
-Write-Host "Custom profile copied successfully."
-
-# Copy Custom Oh My Posh Theme
-$customThemeSourcePath = Join-Path -Path $clonePath -ChildPath "customkali.omp.json"
-$destinationThemePath = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes\customkali.omp.json"
-$destinationThemeFolder = Split-Path -Path $destinationThemePath
-if (-Not (Test-Path -Path $destinationThemeFolder)) {
-    New-Item -Path $destinationThemeFolder -ItemType Directory -Force
-}
-Write-Host "Copying custom theme to $destinationThemePath..."
-Copy-Item -Path $customThemeSourcePath -Destination $destinationThemePath -Force
-Write-Host "Custom theme copied successfully."
-
+Write-Host "Oh-My-Posh installed or updated. Please restart your PowerShell session."
