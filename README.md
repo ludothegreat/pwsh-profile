@@ -1,6 +1,6 @@
 # pwsh-profile
 
-> :warning: **Early Development**: This project is in the early stages of development and may undergo significant changes. Please use with caution and consider contributing if you encounter issues or have suggestions.
+> :warning: **Early Development**: I am currently developing this profile and need to have a way to install it on multiple computers with ease. This project is in the early stages of development and may undergo significant changes. Please use with caution and consider contributing if you encounter issues or have suggestions.
 
 ## Overview
 
