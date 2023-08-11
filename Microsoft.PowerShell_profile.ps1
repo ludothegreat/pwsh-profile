@@ -19,7 +19,8 @@ function Get-IPAddress {
             $isLinkLocal = if ($IPv6) { $_.PrefixOrigin -eq "WellKnown" } else { $_.IPAddress.StartsWith("169.254.") }
             Write-Host ("Interface: {0} - IP Address: {1} - Prefix Length: {2} - Link Local: {3}" -f $_.InterfaceAlias, $_.IPAddress, $_.PrefixLength, $isLinkLocal)
         }
-    } else {
+    }
+    else {
         $firstAddress = $ipAddresses | Select-Object -First 1
         $isLinkLocal = if ($IPv6) { $firstAddress.PrefixOrigin -eq "WellKnown" } else { $firstAddress.IPAddress.StartsWith("169.254.") }
         Write-Host ("Interface: {0} - IP Address: {1} - Prefix Length: {2} - Link Local: {3}" -f $firstAddress.InterfaceAlias, $firstAddress.IPAddress, $firstAddress.PrefixLength, $isLinkLocal)
@@ -68,24 +69,24 @@ function weather {
     # Function to get weather icon
     function Get-WeatherIcon ($weatherMain) {
         switch ($weatherMain) {
-            "Clouds"   { "☁️" }
-            "Rain"     { "🌧️" }
-            "Snow"     { "❄️" }
+            "Clouds" { "☁️" }
+            "Rain" { "🌧️" }
+            "Snow" { "❄️" }
             "Thunderstorm" { "⛈️" }
-            "Clear"    { "☀️" }
-            default    { "" }
+            "Clear" { "☀️" }
+            default { "" }
         }
     }
 
     # Function to get color based on weather condition
     function Get-WeatherColor ($weatherMain) {
         switch ($weatherMain) {
-            "Clouds"   { "Gray" }
-            "Rain"     { "Blue" }
-            "Snow"     { "White" }
+            "Clouds" { "Gray" }
+            "Rain" { "Blue" }
+            "Snow" { "White" }
             "Thunderstorm" { "DarkRed" }
-            "Clear"    { "Yellow" }
-            default    { "Green" }
+            "Clear" { "Yellow" }
+            default { "Green" }
         }
     }
 
@@ -141,7 +142,9 @@ function weather {
 }
 
 # Import ToDo module
-Import-Module C:\Scripts\pwsh-profile\ToDo.psm1
+$oneDrivePath = [Environment]::GetEnvironmentVariable('OneDrive', 'User')
+$modulePath = Join-Path -Path $oneDrivePath -ChildPath "Documents\PowerShell\Modules\ToDo.psm1"
+Import-Module $modulePath
 
 # Create aliases for the functions
 Set-Alias atd Add-ToDo
@@ -158,12 +161,15 @@ function up {
     winget upgrade
 }
 
+# Reload alias function
 function Update-Profile {
+    $oneDrivePath = [Environment]::GetEnvironmentVariable('OneDrive', 'User')
+    $modulePath = Join-Path -Path $oneDrivePath -ChildPath "Documents\PowerShell\Modules\ToDo.psm1"
     . $PROFILE
-    Import-Module C:\Scripts\pwsh-profile\ToDo.psm1 -Force
+    Import-Module $modulePath -Force
     Write-Host "Profile updated and modules imported." -ForegroundColor Green
 }
 Set-Alias reload Update-Profile
 
 ## Final Line to set prompt
-oh-my-posh init pwsh --config '%LOCALAPPDATA%\Programs\oh-my-posh\themes\customkali.omp'| Invoke-Expression
+oh-my-posh init pwsh --config '$env:POSH_THEMES_PATH\\customkali.omp.json' | Invoke-Expression
