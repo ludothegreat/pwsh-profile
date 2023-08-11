@@ -53,8 +53,8 @@ function docs {
 }
 
 function weather {
-    $apiKey = "ffedc6c0e07255a9ddc1a2407d4b550c"
-    $city = "dubuque"
+    $apiKey = "<YOUR OPENWEATHERMAP.ORG API KEY>"
+    $city = "<YOUR CITY>"
     $currentWeatherUrl = "http://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=imperial"
     $forecastUrl = "http://api.openweathermap.org/data/2.5/forecast?q=$city&appid=$apiKey&units=imperial"
 
