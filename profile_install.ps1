@@ -1,3 +1,26 @@
+# Check if winget is installed
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Write-Host "winget is not installed. Installing now..."
+
+    # Install winget outside of the store
+    Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+
+    Write-Host "winget installation complete."
+} else {
+    Write-Host "winget is already installed."
+}
+
+# Check if the latest PowerShell version is installed
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "Installing latest PowerShell version..."
+
+    # Use winget to install the latest PowerShell version
+    winget install --id=Microsoft.PowerShell -e
+}
+
+Write-Host "Latest PowerShell version installed."
+
+
 winget install JanDeDobbeleer.OhMyPosh -s winget
 
 # Check if running as an administrator
