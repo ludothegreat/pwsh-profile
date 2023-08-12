@@ -59,6 +59,40 @@ function Install-WindowsTerminal {
     Write-Host "Windows Terminal has been installed successfully."
 }
 
+function Install-Winget {
+    # Check if winget is already installed
+    if (Get-Command -Name 'winget' -ErrorAction SilentlyContinue) {
+        Write-Host "Winget is already installed."
+        return
+    }
+    
+    Write-Host "Winget is not installed. Installing..."
+
+    # Set the API URL for the latest release
+    $latestReleaseApiUrl = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
+
+    # Invoke the REST method to get the latest release information
+    $releaseInfo = Invoke-RestMethod -Uri $latestReleaseApiUrl
+
+    # Find the download URL for the Windows AppX package
+    $downloadUrl = ($releaseInfo.assets | Where-Object { $_.browser_download_url -like '*.appxbundle' }).browser_download_url
+
+    # Define the output file path
+    $outFile = "$env:TEMP\\" + [System.IO.Path]::GetFileName($downloadUrl)
+
+    Write-Host "Downloading $downloadUrl..."
+
+    # Download the AppX file
+    Invoke-WebRequest -Uri $downloadUrl -OutFile $outFile
+
+    Write-Host "Installing Winget..."
+
+    # Install the downloaded AppX package silently
+    Add-AppxPackage -Path $outFile
+
+    Write-Host "Winget has been installed successfully."
+}
+
 function Update-OhMyPosh {
     # Check if oh-my-posh is installed
     $ohMyPoshPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\oh-my-posh.exe"
@@ -99,6 +133,9 @@ Install-LatestPowerShell
 
 # Install latest Windows Terminal
 Install-WindowsTerminal
+
+# Install latest Winget
+Install-Winget
 
 # Install or update Oh-My-Posh
 Update-OhMyPosh
