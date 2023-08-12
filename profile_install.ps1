@@ -7,6 +7,7 @@ function Install-LatestPowerShell {
         Write-Host "PowerShell 7 is already installed."
         return
     }
+    Write-Host "Powershell 7 is not installed. Installing..."
 
     # Set the API URL for the latest release
     $latestReleaseApiUrl = "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
@@ -20,11 +21,42 @@ function Install-LatestPowerShell {
     # Define the output file path
     $outFile = "$env:USERPROFILE\Downloads\" + [System.IO.Path]::GetFileName($downloadUrl)
 
+    Write-Host "Downloading $latestReleaseApiUrl..."
+
     # Download the MSI file
     Invoke-WebRequest -Uri $downloadUrl -OutFile $outFile
 
+    Write-Host "Running $outFile Installer..."
+
     # Install the downloaded MSI silently
     Start-Process -FilePath 'msiexec.exe' -ArgumentList "/i `"$outFile`" /quiet /norestart" -Wait
+
+    Write-Host "Done! Checking if Oh My Posh is installed..."
+}
+
+function Install-WindowsTerminal {
+    # Check if Windows Terminal is already installed
+    if (Get-AppxPackage -Name 'Microsoft.WindowsTerminal' -ErrorAction SilentlyContinue) {
+        Write-Host "Windows Terminal is already installed."
+        return
+    }
+    Write-Host "Windows Terminal is not installed. Installing..."
+
+    # Set the URL for the latest release of Windows Terminal
+    $latestReleaseApiUrl = 'https://api.github.com/repos/microsoft/terminal/releases/latest'
+    $response = Invoke-RestMethod -Uri $latestReleaseApiUrl
+
+    # Extract the MSIX bundle download URL
+    $msixBundleUrl = $response.assets | Where-Object { $_.name -like '*.msixbundle' } | Select-Object -ExpandProperty browser_download_url
+
+    # Download the MSIX bundle
+    $downloadPath = Join-Path $env:TEMP "WindowsTerminal.msixbundle"
+    Invoke-WebRequest -Uri $msixBundleUrl -OutFile $downloadPath
+
+    # Install the MSIX bundle
+    Add-AppxPackage -Path $downloadPath
+
+    Write-Host "Windows Terminal has been installed successfully."
 }
 
 function Update-OhMyPosh {
@@ -40,10 +72,36 @@ function Update-OhMyPosh {
     Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://ohmyposh.dev/install.ps1'))
 }
 
-# Install the latest version of PowerShell
+function Update-OhMyPoshPath {
+    # Define the path to oh-my-posh
+    $ohMyPoshPath = "$env:LOCALAPPDATA\Programs\oh-my-posh\bin"
+
+    # Add the oh-my-posh path to the current PATH
+    $env:Path += ";$ohMyPoshPath"
+
+    Write-Host "Manually updating path for this session..."
+
+    # Test if oh-my-posh is accessible
+    try {
+        $ohMyPoshSource = (Get-Command oh-my-posh).Source
+        if ($ohMyPoshSource -like "*$ohMyPoshPath*") {
+            Write-Host "Path update completed successfully!"
+        } else {
+            Write-Host "Path update failed. Oh-My-Posh is not accessible."
+        }
+    } catch {
+        Write-Host "Error: Oh-My-Posh is not accessible. Please check the installation and path."
+    }
+}
+
+# Install latest PowerShell
 Install-LatestPowerShell
+
+# Install latest Windows Terminal
+Install-WindowsTerminal
 
 # Install or update Oh-My-Posh
 Update-OhMyPosh
 
-Write-Host "Oh-My-Posh installed or updated. Please restart your PowerShell session."
+# Update Oh My Posh path and test
+Update-OhMyPoshPath
