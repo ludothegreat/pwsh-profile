@@ -15,9 +15,9 @@ This repository contains scripts and tools to manage, backup, and restore PowerS
 
 ### Modules
 
-- `[HyperFocus.psm1](https://github.com/ludothegreat/HyperFocus)`: A PowerShell module for hyper-focus functionality.
-- `[PSWeather.psm1](https://github.com/ludothegreat/PSWeather)`: A PowerShell module for weather-related functionalities.
-- `[RDPManager.psm1](https://github.com/ludothegreat/RDPManager)`: A PowerShell module for Remote Desktop Protocol (RDP) management.
+- [HyperFocus.psm1](https://github.com/ludothegreat/HyperFocus): A PowerShell module for hyper-focus functionality.
+- [PSWeather.psm1](https://github.com/ludothegreat/PSWeather): A PowerShell module for weather-related functionalities.
+- [RDPManager.psm1](https://github.com/ludothegreat/RDPManager): A PowerShell module for Remote Desktop Protocol (RDP) management.
 - `interactivemenu.psm1`: A PowerShell module for interactive menus.
 
 ### Other Files
