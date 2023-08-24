@@ -1,5 +1,62 @@
-# Import Terminal Icons
+# Welcome function to display disk space and resource utilization
+function Show-WelcomeMessage {
+    Write-Host @"
+_________________________________________________________________________
+LudoTheGreat's Custom Powershell Environment!
+
+Quick Overview:
+- Monitor Disk Space, CPU & Memory Utilization
+- Manage HyperFocus Tasks
+- Control Network Adapter, DNS, and System Updates
+- Edit Files & Navigate Directories
+- Import Custom Modules & Scripts
+
+Type 'Menu' for an interactive menu for all functions or 'profile-help' for detailed documentation.
+Happy Commanding!
+_________________________________________________________________________
+"@ -ForegroundColor DarkRed
+
+    Write-Host "Loading Profile..." -ForegroundColor Black -BackgroundColor DarkYellow
+
+    # Disk Space Check
+    Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
+        $freeSpaceGB = [math]::Round($_.FreeSpace / 1GB, 2)
+        $totalSpaceGB = [math]::Round($_.Size / 1GB, 2)
+        Write-Host ("Drive {0}: {1} GB free of {2} GB total" -f $_.DeviceID, $freeSpaceGB, $totalSpaceGB) -ForegroundColor Black -BackgroundColor DarkGreen
+    }
+
+
+    # CPU Utilization Check
+    $cpuUtilization = Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue | ForEach-Object { [math]::Round($_, 2) }
+    Write-Host ("CPU Utilization: {0}%" -f $cpuUtilization) -ForegroundColor Black -BackgroundColor DarkGreen
+
+    # Memory Utilization Check
+    $totalMemory = Get-CimInstance -ClassName CIM_OperatingSystem | Select-Object -ExpandProperty TotalVisibleMemorySize
+    $freeMemory = Get-CimInstance -ClassName CIM_OperatingSystem | Select-Object -ExpandProperty FreePhysicalMemory
+    $usedMemoryPercentage = [math]::Round((($totalMemory - $freeMemory) / $totalMemory) * 100, 2)
+    Write-Host ("Memory Utilization: {0}%" -f $usedMemoryPercentage) -ForegroundColor Black -BackgroundColor DarkGreen
+}
+
+# Call the welcome function when the profile is loaded
+Show-WelcomeMessage
+
+# Import Modules
 Import-Module -Name Terminal-Icons
+Write-Host "Imported Terminal-Icons..." -ForegroundColor Black -BackgroundColor Cyan
+Import-Module "C:\Scripts\HyperFocus\HyperFocus.psm1"
+Write-Host "Imported HyperFocus..." -ForegroundColor Black -BackgroundColor Cyan
+Import-Module "C:\Scripts\rdpmanager\RDPManager.psm1"
+Write-Host "Imported RDPManager..." -ForegroundColor Black -BackgroundColor Cyan
+Import-Module "C:\Scripts\PSWeather\PSWeather.psm1"
+Write-Host "Imported PSWeather..." -ForegroundColor Black -BackgroundColor Cyan
+Import-Module "C:\Scripts\IPEnrichment\Get-IPEnrichment.ps1"
+Write-Host "Imported IPEnrichment..."-ForegroundColor Black -BackgroundColor Cyan
+Import-Module "C:\Users\ludot\OneDrive\Documents\PowerShell\interactivemenu.psm1"
+Write-Host "Type 'Menu' to show all functions..." -ForegroundColor Black -BackgroundColor DarkRed
+Write-Host "_____________________________________" 
+Write-Host "HyperFocus Task List:"
+Get-HyperFocusTasks True
+Write-Host "_____________________________________"
 
 function Get-IPAddress {
     param (
@@ -50,126 +107,61 @@ function home {
 
 # Navigate to the user's Documents folder
 function docs {
-    # Get the OneDrive path from the environment variable
-    $oneDrivePath = [Environment]::GetEnvironmentVariable('OneDrive', 'User')
-    
-    # Construct the path to the OneDrive Documents folder
-    $oneDriveDocumentsPath = Join-Path -Path $oneDrivePath -ChildPath "Documents"
-    
-    # Navigate to the OneDrive Documents folder
-    Set-Location $oneDriveDocumentsPath
+    Set-Location "C:\Users\ludot\OneDrive\Documents"
 }
 
-function weather {
-    $apiKey = "<YOUR OPENWEATHERMAP.ORG API KEY>"
-    $city = "<YOUR CITY>"
-    $currentWeatherUrl = "http://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=imperial"
-    $forecastUrl = "http://api.openweathermap.org/data/2.5/forecast?q=$city&appid=$apiKey&units=imperial"
+# Path to the help file (adjust as needed)
+$helpFilePath = "C:\Users\ludot\OneDrive\Documents\PowerShell\powershell-profile-help.md"
 
-    # Function to get weather icon
-    function Get-WeatherIcon ($weatherMain) {
-        switch ($weatherMain) {
-            "Clouds" { "☁️" }
-            "Rain" { "🌧️" }
-            "Snow" { "❄️" }
-            "Thunderstorm" { "⛈️" }
-            "Clear" { "☀️" }
-            default { "" }
-        }
+# Function to open the help file
+function show-profile-help {
+    if (Test-Path -Path $helpFilePath) {
+        # Open the help file in Visual Studio Code (or change to your preferred editor)
+        code $helpFilePath
     }
-
-    # Function to get color based on weather condition
-    function Get-WeatherColor ($weatherMain) {
-        switch ($weatherMain) {
-            "Clouds" { "Gray" }
-            "Rain" { "Blue" }
-            "Snow" { "White" }
-            "Thunderstorm" { "DarkRed" }
-            "Clear" { "Yellow" }
-            default { "Green" }
-        }
+    else {
+        Write-Host "Help file not found at $helpFilePath. Please make sure the file exists." -ForegroundColor Red
     }
-
-    # Fetch and display current weather
-    $currentWeatherResponse = Invoke-RestMethod -Uri $currentWeatherUrl
-    $temp = $currentWeatherResponse.main.temp
-    $description = $currentWeatherResponse.weather[0].description
-    $icon = Get-WeatherIcon $currentWeatherResponse.weather[0].main
-    $color = Get-WeatherColor $currentWeatherResponse.weather[0].main
-    Write-Host ("The current weather in {0} is {1}°F with {2} {3}." -f $city, $temp, $description, $icon) -ForegroundColor $color
-
-    # Fetch 5-day forecast
-    $forecastResponse = Invoke-RestMethod -Uri $forecastUrl
-
-    Write-Host "5-day forecast:"
-    $currentDate = ""
-    $dailyHigh = [double]::MinValue
-    $dailyLow = [double]::MaxValue
-    $weatherConditions = @()
-    $count = 0
-
-    $forecastResponse.list | ForEach-Object {
-        $forecastTime = [DateTime]::ParseExact($_.dt_txt, "yyyy-MM-dd HH:mm:ss", $null)
-        $forecastDate = $forecastTime.ToString("MM-dd-yyyy")
-
-        # Check if the date has changed
-        if ($forecastDate -ne $currentDate -and $currentDate -ne "") {
-            $mostCommonCondition = $weatherConditions | Group-Object | Sort-Object Count -Descending | Select-Object -First 1
-            $icon = Get-WeatherIcon $mostCommonCondition.Name
-            $color = Get-WeatherColor $mostCommonCondition.Name
-            Write-Host ("  {0}: High {1}°F, Low {2}°F {3}" -f $currentDate, $dailyHigh, $dailyLow, $icon) -ForegroundColor $color
-            $dailyHigh = [double]::MinValue
-            $dailyLow = [double]::MaxValue
-            $weatherConditions = @()
-            $count++
-            if ($count -eq 5) { break } # Limit to 5 days
-        }
-
-        # Update daily high and low temperatures
-        $temp = $_.main.temp
-        if ($temp -gt $dailyHigh) { $dailyHigh = $temp }
-        if ($temp -lt $dailyLow) { $dailyLow = $temp }
-        $weatherConditions += $_.weather[0].main
-
-        $currentDate = $forecastDate
-    }
-
-    # Display the last day
-    $mostCommonCondition = $weatherConditions | Group-Object | Sort-Object Count -Descending | Select-Object -First 1
-    $icon = Get-WeatherIcon $mostCommonCondition.Name
-    $color = Get-WeatherColor $mostCommonCondition.Name
-    Write-Host ("  {0}: High {1}°F, Low {2}°F {3}" -f $currentDate, $dailyHigh, $dailyLow, $icon) -ForegroundColor $color
 }
+Set-Alias profile-help show-profile-help
 
-# Import ToDo module
-$oneDrivePath = [Environment]::GetEnvironmentVariable('OneDrive', 'User')
-$modulePath = Join-Path -Path $oneDrivePath -ChildPath "Documents\PowerShell\Modules\ToDo.psm1"
-Import-Module $modulePath
+# Create aliases for the HyperFocus functions
+Set-Alias aht Add-HyperFocusTask
+Set-Alias ahts Add-HyperFocusTasks
+Set-Alias rht Remove-HyperFocusTask
+Set-Alias ght Get-HyperFocusTasks
+Set-Alias cht Clear-HyperFocusTasks
+Set-Alias sht Save-HyperFocusTasks
+Set-Alias iht Import-HyperFocusTasks
+Set-Alias amht Add-MultipleHyperFocusTasks
+Set-Alias shth Show-HyperFocusHelp
+Set-Alias uhts Update-HyperFocusStatus
 
-# Create aliases for the functions
-Set-Alias atd Add-ToDo
-Set-Alias rtd Remove-ToDo
-Set-Alias gtd Get-ToDos # Corrected alias for Get-ToDos
-Set-Alias ctd Clear-ToDos
-Set-Alias std Save-ToDos
-Set-Alias itd Import-ToDos # Alias for Import-ToDos
-Set-Alias amtd Add-MultipleToDos
+# Creat aliase for Interactive Menu
+Set-Alias Menu Show-InteractiveMenu
 
+# Create alias for IPDetailsModule
+Set-Alias WhoIs Get-IPDetails
 
 # Update system packages using winget
 function up {
-    winget upgrade
+    Write-Host "Updating source list..." -ForegroundColor Cyan
+    winget source update # Update the source list
+
+    Write-Host "Listing packages that require upgrading..." -ForegroundColor Cyan
+    winget upgrade # List all packages that require upgrading
+
+    Write-Host "Upgrading all packages that require upgrading..." -ForegroundColor Cyan
+    winget upgrade --all # Upgrade all packages that require upgrading
+
+    Write-Host "Update and upgrade completed." -ForegroundColor Green
 }
 
-# Reload alias function
 function Update-Profile {
-    $oneDrivePath = [Environment]::GetEnvironmentVariable('OneDrive', 'User')
-    $modulePath = Join-Path -Path $oneDrivePath -ChildPath "Documents\PowerShell\Modules\ToDo.psm1"
     . $PROFILE
-    Import-Module $modulePath -Force
     Write-Host "Profile updated and modules imported." -ForegroundColor Green
 }
 Set-Alias reload Update-Profile
 
 ## Final Line to set prompt
-oh-my-posh init pwsh --config '$env:POSH_THEMES_PATH\\customkali.omp.json' | Invoke-Expression
+oh-my-posh init pwsh --config 'C:\Users\ludot\AppData\Local\Programs\oh-my-posh\themes\customkali.omp.json' | Invoke-Expression
