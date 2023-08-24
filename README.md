@@ -22,11 +22,13 @@ This repository contains scripts and tools to manage, backup, and restore PowerS
 
 ### Other Files
 
+- `Microsoft.PowerShell_profile.ps1` Custom Powershell Profile with multiple different functions.
 - `customkali.omp.json`: A custom JSON configuration file.
+- `powershell-profile-help.md` Help file, because I forget stuff.
 - `Get-CountryCodesAndContinents.ps1` : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
 - `Get-GeoIP.ps1` : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
-- `Get-IPEnrichment.ps1`  : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
-- `Get-WhoIs.ps1`  : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
+- `Get-IPEnrichment.ps1` : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
+- `Get-WhoIs.ps1` : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
 - `PowerShell-GeoIP-WhoIs-IPEnrichment-Tools-LICENSE`: License file for the GeoIP and WhoIs enrichment tools by  : [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
 - `PowerShell-GeoIP-WhoIs-IPEnrichment-Tools-README.md`: README file for the GeoIP and WhoIs enrichment tools by  : [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
 
