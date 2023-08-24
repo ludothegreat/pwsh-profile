@@ -2,56 +2,58 @@
 
 > :warning: **Early Development**: I am currently developing this profile and need to have a way to install it on multiple computers with ease. This project is in the early stages of development and may undergo significant changes. Please use with caution and consider contributing if you encounter issues or have suggestions.
 
-## Overview
+# PowerShell Profile Backup and Restore
 
-`pwsh-profile` is a PowerShell profile configuration project that automates the setup and customization of a PowerShell environment. It includes configurations for Oh My Posh, custom fonts, themes, and other enhancements to improve the PowerShell experience.
+This repository contains scripts and tools to manage, backup, and restore PowerShell profiles and associated files. It includes a set of PowerShell modules and scripts to perform specific tasks related to profile management.
 
-## Features
+## Contents
 
-- **Automated Installation**: Simplifies the setup process by automating the installation of required tools and components.
-- **Custom Themes**: Includes custom themes for Oh My Posh that enhance the visual appearance of the PowerShell prompt.
-- **Font Integration**: Installs and configures custom fonts to complement the themes.
-- **Profile Customization**: Provides a custom PowerShell profile that can be easily copied to the user's profile directory.
+### Scripts
 
-## Usage
+- `copy_profile.ps1`: Copies specified profile files to a designated folder, creating backups and handling file naming.
+- `restore_profile.ps1`: Restores profile files from the backup folder to their original locations.
 
-Setting up the `pwsh-profile` for your PowerShell environment is a simple process. Just follow these steps:
+### Modules
 
-### Step 1: Clone the Repository
+- `[HyperFocus.psm1](https://github.com/ludothegreat/HyperFocus)`: A PowerShell module for hyper-focus functionality.
+- `[PSWeather.psm1](https://github.com/ludothegreat/PSWeather)`: A PowerShell module for weather-related functionalities.
+- `[RDPManager.psm1](https://github.com/ludothegreat/RDPManager)`: A PowerShell module for Remote Desktop Protocol (RDP) management.
+- `interactivemenu.psm1`: A PowerShell module for interactive menus.
 
-Clone the `pwsh-profile` repository to your local machine. You can use the following command:
+### Other Files
 
-    git clone https://github.com/ludothegreat/pwsh-profile.git
+- `customkali.omp.json`: A custom JSON configuration file.
+- `Get-CountryCodesAndContinents.ps1` : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
+- `Get-GeoIP.ps1` : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
+- `Get-IPEnrichment.ps1`  : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
+- `Get-WhoIs.ps1`  : Powershell tool written by [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
+- `PowerShell-GeoIP-WhoIs-IPEnrichment-Tools-LICENSE`: License file for the GeoIP and WhoIs enrichment tools by  : [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
+- `PowerShell-GeoIP-WhoIs-IPEnrichment-Tools-README.md`: README file for the GeoIP and WhoIs enrichment tools by  : [SecTraversl : PowerShell-GeoIP-WhoIs-IPEnrichment-Tools](https://github.com/SecTraversl/PowerShell-GeoIP-WhoIs-IPEnrichment-Tools)
 
-### Step 2: Navigate to the Repository
+### Backup Profile
 
-Navigate to the cloned repository folder:
+Run the `copy_profile.ps1` script to copy and backup the profile files to the specified folder.
 
-    cd pwsh-profile
+```powershell
+.\copy_profile.ps1
+```
 
-### Step 3: Run the Installer Script
+### Restore Profile
 
-Execute the `profile_install.ps1` script to begin the installation and configuration process:
+Run the `restore_profile.ps1` script to restore the profile files from the backup folder.
 
-    .\profile_install.ps1
-
-### Step 4: Customize (Optional)
-
-Feel free to customize the profile, themes, and other settings to suit your preferences. You'll find the custom profile and theme files in the repository folder.
-
-### Step 5: Enjoy Your New PowerShell Experience!
-
-That's it! Your PowerShell environment is now configured with Oh My Posh, custom fonts, and themes. Enjoy your enhanced PowerShell experience!
-
-## Requirements
-
-- Windows operating system with PowerShell 5.1 or higher.
-- Administrator privileges for certain installation steps.
-
-## Contributing
-
-Contributions are welcome! If you encounter any issues or have suggestions for improvements, please open an issue or submit a pull request.
+```powershell
+.\restore_profile.ps1
+```
 
 ## License
 
-Please refer to the [LICENSE](LICENSE) file for details on the project's license.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Acknowledgments
+
+- Thanks to all contributors and users of this project.
