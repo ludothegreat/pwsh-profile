@@ -1,62 +1,65 @@
 # Welcome function to display disk space and resource utilization
-function Show-WelcomeMessage {
-    Write-Host @"
-_________________________________________________________________________
-LudoTheGreat's Custom Powershell Environment!
+function Show-WelcomeMessage {  
+    Write-Host "Quick Options:" -ForegroundColor DarkRed
+    Write-Host "- 'Menu' for interactive menu" -ForegroundColor DarkRed
+    Write-Host "- 'Profile-Help' for more detailed documentation" -ForegroundColor DarkRed
+    Write-Host "=========================================================================" -ForegroundColor DarkRed
+	Write-Host "`n`r"
+    
+    # System Status
 
-Quick Overview:
-- Monitor Disk Space, CPU & Memory Utilization
-- Manage HyperFocus Tasks
-- Control Network Adapter, DNS, and System Updates
-- Edit Files & Navigate Directories
-- Import Custom Modules & Scripts
+	Write-Host "-------------:System Status:------------"
 
-Type 'Menu' for an interactive menu for all functions or 'profile-help' for detailed documentation.
-Happy Commanding!
-_________________________________________________________________________
-"@ -ForegroundColor DarkRed
+	# Disk Space Check
+	Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
+		$freeSpaceGB = [math]::Round($_.FreeSpace / 1GB, 2)
+		$totalSpaceGB = [math]::Round($_.Size / 1GB, 2)
+    
+		$isDangerous = $freeSpaceGB / $totalSpaceGB -lt 0.1
+		$color = if ($isDangerous) { "DarkRed" } else { "DarkGreen" }
 
-    Write-Host "Loading Profile..." -ForegroundColor Black -BackgroundColor DarkYellow
+		$formattedString = "{0} {1}GB Free of {2}GB" -f $_.DeviceID, $freeSpaceGB, $totalSpaceGB
+		Write-Host "||   $formattedString     ||" -NoNewline -ForegroundColor $($isDangerous ? $color : 'Gray')
+	}
 
-    # Disk Space Check
-    Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object {
-        $freeSpaceGB = [math]::Round($_.FreeSpace / 1GB, 2)
-        $totalSpaceGB = [math]::Round($_.Size / 1GB, 2)
-        Write-Host ("Drive {0}: {1} GB free of {2} GB total" -f $_.DeviceID, $freeSpaceGB, $totalSpaceGB) -ForegroundColor Black -BackgroundColor DarkGreen
-    }
+	# CPU Utilization Check
+	$cpuUtilization = Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue | ForEach-Object { [math]::Round($_, 2) }
+	$isDangerous = $cpuUtilization -gt 90
+	$color = if ($isDangerous) { "DarkRed" } else { "DarkGreen" }
+	Write-Host ("`n||   CPU Utilization: {0,-5}%          ||" -f $cpuUtilization) -ForegroundColor $($isDangerous ? $color : 'Gray')
 
-
-    # CPU Utilization Check
-    $cpuUtilization = Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 | Select-Object -ExpandProperty CounterSamples | Select-Object -ExpandProperty CookedValue | ForEach-Object { [math]::Round($_, 2) }
-    Write-Host ("CPU Utilization: {0}%" -f $cpuUtilization) -ForegroundColor Black -BackgroundColor DarkGreen
-
-    # Memory Utilization Check
-    $totalMemory = Get-CimInstance -ClassName CIM_OperatingSystem | Select-Object -ExpandProperty TotalVisibleMemorySize
-    $freeMemory = Get-CimInstance -ClassName CIM_OperatingSystem | Select-Object -ExpandProperty FreePhysicalMemory
-    $usedMemoryPercentage = [math]::Round((($totalMemory - $freeMemory) / $totalMemory) * 100, 2)
-    Write-Host ("Memory Utilization: {0}%" -f $usedMemoryPercentage) -ForegroundColor Black -BackgroundColor DarkGreen
+	# Memory Utilization Check
+	$totalMemory = Get-CimInstance -ClassName CIM_OperatingSystem | Select-Object -ExpandProperty TotalVisibleMemorySize
+	$freeMemory = Get-CimInstance -ClassName CIM_OperatingSystem | Select-Object -ExpandProperty FreePhysicalMemory
+	$usedMemoryPercentage = [math]::Round((($totalMemory - $freeMemory) / $totalMemory) * 100, 2)
+	$isDangerous = $usedMemoryPercentage -gt 90
+	$color = if ($isDangerous) { "DarkRed" } else { "DarkGreen" }
+	Write-Host ("||   Memory Utilization: {0,-5}%       ||" -f $usedMemoryPercentage) -ForegroundColor $($isDangerous ? $color : 'Gray')
+	
+	# Closing border
+	Write-Host "----------------------------------------"
+	
+	# Import Modules
+	Import-Module -Name Terminal-Icons
+	Import-Module "C:\Scripts\HyperFocus\HyperFocus.psm1"
+	Import-Module "C:\Scripts\rdpmanager\RDPManager.psm1"
+    Import-Module "C:\Scripts\PSWeather\PSWeather.psm1"
+	Import-Module "C:\Scripts\IPEnrichment\Get-IPEnrichment.ps1"
+	Import-Module "C:\Scripts\IPEnrichment\Get-CountryCodesAndContinents.ps1"
+	Import-Module "C:\Scripts\IPEnrichment\Get-GeoIP.ps1"
+	Import-Module "C:\Scripts\IPEnrichment\Get-WhoIs.ps1"
+	Import-Module "C:\Users\tjohnson\OneDrive - American Customer Care\Documents\PowerShell\interactivemenu.psm1"
 }
+
 
 # Call the welcome function when the profile is loaded
 Show-WelcomeMessage
+Write-Host "`n`r"
 
-# Import Modules
-Import-Module -Name Terminal-Icons
-Write-Host "Imported Terminal-Icons..." -ForegroundColor Black -BackgroundColor Cyan
-Import-Module "C:\Scripts\HyperFocus\HyperFocus.psm1"
-Write-Host "Imported HyperFocus..." -ForegroundColor Black -BackgroundColor Cyan
-Import-Module "C:\Scripts\rdpmanager\RDPManager.psm1"
-Write-Host "Imported RDPManager..." -ForegroundColor Black -BackgroundColor Cyan
-Import-Module "C:\Scripts\PSWeather\PSWeather.psm1"
-Write-Host "Imported PSWeather..." -ForegroundColor Black -BackgroundColor Cyan
-Import-Module "C:\Scripts\IPEnrichment\Get-IPEnrichment.ps1"
-Write-Host "Imported IPEnrichment..."-ForegroundColor Black -BackgroundColor Cyan
-Import-Module "C:\Users\ludot\OneDrive\Documents\PowerShell\interactivemenu.psm1"
-Write-Host "Type 'Menu' to show all functions..." -ForegroundColor Black -BackgroundColor DarkRed
-Write-Host "_____________________________________" 
-Write-Host "HyperFocus Task List:"
+# Load HyperFocus Task list
+Write-Host "_________________________________________________________________________" 
 Get-HyperFocusTasks True
-Write-Host "_____________________________________"
+Write-Host "_________________________________________________________________________"
 
 function Get-IPAddress {
     param (
@@ -107,11 +110,11 @@ function home {
 
 # Navigate to the user's Documents folder
 function docs {
-    Set-Location "C:\Users\ludot\OneDrive\Documents"
+    Set-Location "C:\Users\tjohnson\OneDrive - American Customer Care\Documents"
 }
 
 # Path to the help file (adjust as needed)
-$helpFilePath = "C:\Users\ludot\OneDrive\Documents\PowerShell\powershell-profile-help.md"
+$helpFilePath = "C:\Users\tjohnson\OneDrive - American Customer Care\Documents\PowerShell\powershell-profile-help.md"
 
 # Function to open the help file
 function show-profile-help {
@@ -141,7 +144,17 @@ Set-Alias uhts Update-HyperFocusStatus
 Set-Alias Menu Show-InteractiveMenu
 
 # Create alias for IPDetailsModule
-Set-Alias WhoIs Get-IPDetails
+Set-Alias WhoIs Get-IPEnrichment
+
+# Activity control
+Set-Alias Here "C:\Users\tjohnson\OneDrive - American Customer Care\Desktop\scrolllock.vbs"
+# Custom function to stop wscript.exe
+function Stop-WScript {
+    Stop-Process -Name "wscript"
+}
+
+# Create alias for the custom function
+Set-Alias -Name Away -Value Stop-WScript
 
 # Update system packages using winget
 function up {
@@ -164,4 +177,4 @@ function Update-Profile {
 Set-Alias reload Update-Profile
 
 ## Final Line to set prompt
-oh-my-posh init pwsh --config 'C:\Users\ludot\AppData\Local\Programs\oh-my-posh\themes\customkali.omp.json' | Invoke-Expression
+oh-my-posh init pwsh --config 'C:\Users\tjohnson\AppData\Local\Programs\oh-my-posh\themes\customkali.omp.json' | Invoke-Expression
