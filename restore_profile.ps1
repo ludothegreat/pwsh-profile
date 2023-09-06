@@ -6,7 +6,7 @@ if (Test-Path $env:OneDrive) {
 }
 
 # Define the source directory for all files
-$sourceDir = "C:\Scripts\pwsh-profile"
+$sourceDir = "C:\Users\tjohnson\OneDrive - American Customer Care\Documents\GitHub\pwsh-profile"
 
 # Define the destination details for all files
 $filesToCopy = @{
